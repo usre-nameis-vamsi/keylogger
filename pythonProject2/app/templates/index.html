@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keylogger</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .keystrokes {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f1f1f1;
+            font-family: monospace;
+            white-space: pre-wrap; /* Preserve whitespace */
+            text-align: left;
+            height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Keylogger</h1>
+        <button id="start-btn" class="btn">Start Keylogger</button>
+        <button id="stop-btn" class="btn">Stop Keylogger</button>
+        <h2>Keystrokes:</h2>
+        <div id="keystrokes" class="keystrokes"></div>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            let currentLength = 0;
+
+            $('#start-btn').click(function(){
+                $.post('/start_keylogger', function(data){
+                    if (data.success) {
+                        alert("Keylogger started!");
+                    }
+                });
+            });
+
+            $('#stop-btn').click(function(){
+                $.post('/stop_keylogger', function(data){
+                    if (data.success) {
+                        alert("Keylogger stopped!");
+                    }
+                });
+            });
+
+            function updateKeystrokes() {
+                $.get('/get_keystrokes', function(data){
+                    let keystrokes = data.keystrokes;
+                    if (keystrokes.length > currentLength) {
+                        for (let i = currentLength; i < keystrokes.length; i++) {
+                            let newKeystroke = $('<span>').text(keystrokes[i]);
+                            $('#keystrokes').append(newKeystroke);
+                        }
+                        currentLength = keystrokes.length;
+                    }
+                });
+            }
+
+            setInterval(updateKeystrokes, 1000); // Update keystrokes every second
+        });
+    </script>
+</body>
+</html>
